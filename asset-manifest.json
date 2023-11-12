@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/timer/static/css/main.0bce066b.css",
+    "main.js": "/timer/static/js/main.bb890e0c.js",
+    "index.html": "/timer/index.html",
+    "main.0bce066b.css.map": "/timer/static/css/main.0bce066b.css.map",
+    "main.bb890e0c.js.map": "/timer/static/js/main.bb890e0c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0bce066b.css",
+    "static/js/main.bb890e0c.js"
+  ]
+}
