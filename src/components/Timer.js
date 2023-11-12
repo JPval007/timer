@@ -4,16 +4,16 @@ import 'react-circular-progressbar/dist/styles.css';
 import SettingsContext from '../SettingsContext';
 
 const green = '#34eb77';
-// const violet = '#9d42e3';
+const violet = '#9d42e3';
 
 function Timer() {
     const settingsInfo = useContext(SettingsContext);
 
-    const [isPaused, setIsPaused] = useState(false);
-    const [mode, setMode] = useState('work'); //work break pause
+    const [isPaused, setIsPaused] = useState(true);
+    const [mode, setMode] = useState('work'); // work/break/null
     const [secondsLeft, setSecondsLeft] = useState(0);
 
-    // References for all the varriables to use them without any problem
+    // References to all variables to use them without problem
     const secondsLeftRef = useRef(secondsLeft);
     const isPausedRef = useRef(isPaused);
     const modeRef = useRef(mode);
@@ -23,23 +23,21 @@ function Timer() {
         setSecondsLeft(secondsLeftRef.current);
     }
 
-    function initTimer() {
-        setSecondsLeft(settingsInfo.workMinutes * 60);
-    }
-
-    function switchMode() {
-        const nextMode = modeRef.current === 'work' ? 'break' : 'work';
-        const nextSeconds = (nextMode === 'work' ? settingsInfo.workMinutes * 60 : settingsInfo.breakMiutes * 60)*60;
-        setMode(nextMode);
-        modeRef.current = nextMode;
-
-        setSecondsLeft(nextSeconds);
-        secondsLeftRef.current = nextSeconds;
-    }
-
     useEffect(()=>{
-        // Start timer when play is presed
-        initTimer();
+
+        function switchMode() {
+            const nextMode = modeRef.current === 'work' ? 'break' : 'work';
+            const nextSeconds = (nextMode === 'work' ? settingsInfo.workMinutes : settingsInfo.breakMinutes) * 60;
+      
+            setMode(nextMode);
+            modeRef.current = nextMode;
+      
+            setSecondsLeft(nextSeconds);
+            secondsLeftRef.current = nextSeconds;
+          }
+
+          secondsLeftRef.current = settingsInfo.workMinutes * 60;
+          setSecondsLeft(secondsLeftRef.current);
 
         const interval = setInterval(()=>{
             if (isPausedRef.current) {
@@ -53,22 +51,28 @@ function Timer() {
 
         },1000);
 
-        return clearInterval(interval);
+        return ()=>{clearInterval(interval)};
 
     },[settingsInfo]);
 
-    const totalSeconds = mode === 'work' ? settingsInfo.workMinutes*60 : settingsInfo.breakMiutes*60;
-    const percentage = Math.round(secondsLeft / totalSeconds);
+    const totalSeconds = mode === 'work'
+    ? settingsInfo.workMinutes * 60
+    : settingsInfo.breakMinutes * 60;
+    const percentage = Math.round(secondsLeft / totalSeconds * 100);
+
+    const minutes = Math.floor(secondsLeft / 60);
+    let seconds = secondsLeft % 60;
+    if (seconds < 10) {seconds = '0' + seconds;}
 
     return (
         <>
-            <CircularProgressbar value={percentage} text='60' styles={buildStyles({
+            <CircularProgressbar value={percentage} text={minutes + ":" + seconds} styles={buildStyles({
                 textColor: '#fff',
-                pathColor: green,
+                pathColor: (mode === 'work') ? violet : green,
                 trailColor: '#ababab',
             })} />
             <div style={{marginTop: '20px;'}}>
-                {isPaused ? <button><i className="fa-solid fa-play"></i></button> : <button><i class="fa-solid fa-pause"></i></button>}
+                {isPaused ? <button onClick={() => { setIsPaused(false); isPausedRef.current = false; }} ><i className="fa-solid fa-play"></i></button> : <button onClick={() => { setIsPaused(true); isPausedRef.current = true; }} ><i class="fa-solid fa-pause"></i></button>}
                 
             </div>
             <div style={{marginTop: '20px;'}}>
